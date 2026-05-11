@@ -56,7 +56,14 @@ class ProductOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# Used for paginated list responses — wraps a list of products with a total count
 class ProductList(BaseModel):
+    """ Paginated response wrapper for product list endpoints.
+
+        Example response:
+            {
+                "items": [...],
+                "total": 100
+            }
+    """
     items: list[ProductOut]
     total: int  # total number of products in the database (not just on this page)
