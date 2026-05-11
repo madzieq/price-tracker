@@ -18,9 +18,19 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 class Base(DeclarativeBase):
     pass
 
-# Dependency function that provides a database session for each HTTP request
-# Used with FastAPI's Depends() mechanism in route handlers
 def get_db():
+    """ Provide a database session for each HTTP request.
+
+    Used as a FastAPI dependency via Depends(get_db) in route handlers.
+    Ensures the session is always closed after the request, even if an error occurs.
+
+    Yields:
+        Session: an active SQLAlchemy database session
+    Example:
+        @router.get("/products")
+        def list_products(db: Session = Depends(get_db)):
+            return db.query(Product).all()
+    """
     db = SessionLocal()
     try:
         yield db

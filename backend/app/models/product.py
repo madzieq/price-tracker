@@ -39,6 +39,20 @@ class Product(Base):
 
 
 class PriceHistory(Base):
+    """ Stores price history for a tracked product.
+    A new record is created every time the scraper successfully fetches a price.
+    Args:
+        product_id: id of the product this price belongs to
+        price: scraped price value
+        currency: currency code, defaults to "PLN"
+        scrape_success: False if scraper found the page but could not extract price
+    Example:
+        entry = PriceHistory(
+            product_id=1,
+            price=5299.0,
+            currency="PLN"
+        )
+    """
     __tablename__ = "price_history"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
