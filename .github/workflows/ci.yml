@@ -1,0 +1,128 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint & format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff black
+      - run: ruff check backend/app
+      - run: black --check backend/app
+
+  test-unit:
+    name: Unit tests (pytest)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -e ".[dev]"
+      - name: Run unit tests
+        working-directory: backend
+        run: pytest tests/unit -v --cov=app --cov-report=xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: backend/coverage.xml
+
+  test-integration:
+    name: Integration tests (pytest + postgres + redis)
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tracker
+          POSTGRES_PASSWORD: tracker123
+          POSTGRES_DB: pricetracker
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -e ".[dev]"
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://tracker:tracker123@localhost:5432/pricetracker
+        run: alembic upgrade head
+      - name: Run integration tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://tracker:tracker123@localhost:5432/pricetracker
+          REDIS_URL: redis://localhost:6379/0
+        run: pytest tests/integration -v
+
+  test-e2e:
+    name: E2E tests (Robot Framework)
+    runs-on: ubuntu-latest
+    needs: [test-unit, test-integration]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start full stack
+        run: docker compose up -d --wait
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install robotframework robotframework-seleniumlibrary robotframework-requests
+      - name: Run Robot Framework tests
+        run: |
+          robot --outputdir results \
+                --variable BASE_URL:http://localhost:3000 \
+                --variable API_URL:http://localhost:8000/api/v1 \
+                --variable SELENIUM_HUB:http://localhost:4444/wd/hub \
+                tests/e2e/tests/
+      - name: Upload Robot report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-report
+          path: results/
+
+  build-and-push:
+    name: Build & push Docker image
+    runs-on: ubuntu-latest
+    needs: [test-e2e]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/price-tracker-api:latest
