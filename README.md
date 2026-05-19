@@ -1,91 +1,90 @@
 # 🛒 Price Tracker
 
-Aplikacja do śledzenia cen produktów online z predykcją trendów ML.
+An online product price tracking application with ML trend prediction.
 
-![CI/CD](https://github.com/TWOJ_USERNAME/price-tracker/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://codecov.io/gh/TWOJ_USERNAME/price-tracker/branch/main/graph/badge.svg)
+## Tech Stack
 
-## Stack technologiczny
-
-| Warstwa | Technologie |
+| Layer | Technologies |
 |---|---|
 | Backend API | FastAPI, SQLAlchemy, Alembic |
-| Baza danych | PostgreSQL |
-| Cache / kolejka | Redis + Celery |
+| Database | PostgreSQL |
+| Cache / Queue | Redis + Celery |
 | Scraping | Selenium (Chrome) |
-| ML / analiza | Scikit-learn, Pandas, NumPy |
+| ML / Analysis | Scikit-learn, Pandas, NumPy |
 | Frontend | React + Vite + Recharts |
-| Testy | pytest, Robot Framework + SeleniumLibrary |
+| Tests | pytest, Robot Framework + SeleniumLibrary |
 | CI/CD | GitHub Actions |
-| Infrastruktura | Docker, Docker Compose |
+| Infrastructure | Docker, Docker Compose |
 
-## Szybki start
+## Quick Start
 
 ```bash
-git clone https://github.com/TWOJ_USERNAME/price-tracker
+git clone https://github.com/madzieq/price-tracker
 cd price-tracker
 
-# Uruchom cały stack
+# Start the full stack
 docker compose up -d
 
-# API dostępne na:  http://localhost:8000/docs
-# Frontend:         http://localhost:3000
-# Selenium VNC:     http://localhost:7900
+# API available at:  http://localhost:8000/docs
+# Frontend:          http://localhost:3000
+# Selenium VNC:      http://localhost:7900
 ```
 
-## Migracje bazy danych
+## Database Migrations
 
 ```bash
 cd backend
+
+# Apply all migrations
 alembic upgrade head
 
-# Nowa migracja po zmianie modeli:
-alembic revision --autogenerate -m "opis zmiany"
+# Generate a new migration after model changes
+alembic revision --autogenerate -m "description of change"
 ```
 
-## Testy
+## Tests
 
 ```bash
-# Unit testy (szybkie, bez zewnętrznych serwisów)
+# Unit tests (fast, no external services required)
 cd backend
 pytest tests/unit -v
 
-# Testy integracyjne (wymaga uruchomionego docker compose)
+# Integration tests (requires docker compose running)
 pytest tests/integration -v
 
-# E2E testy Robot Framework (wymaga pełnego stacku)
+# E2E tests with Robot Framework (requires full stack)
 robot --outputdir results tests/e2e/tests/
 ```
 
-## Struktura projektu
+## Project Structure
 
 ```
 price-tracker/
 ├── backend/
 │   ├── app/
-│   │   ├── api/routes/      # FastAPI endpointy
-│   │   ├── core/            # konfiguracja
+│   │   ├── api/routes/      # FastAPI endpoints
+│   │   ├── core/            # configuration
 │   │   ├── db/              # SQLAlchemy setup
-│   │   ├── models/          # modele SQL
+│   │   ├── models/          # SQL models
 │   │   ├── schemas/         # Pydantic schemas
-│   │   ├── services/        # logika biznesowa + ML
+│   │   ├── services/        # business logic + ML
 │   │   └── workers/         # Celery + Selenium scraper
-│   └── alembic/             # migracje DB
+│   └── alembic/             # DB migrations
 ├── frontend/
 │   └── src/
-│       ├── components/      # React komponenty
-│       ├── pages/           # widoki
-│       └── api/             # klient HTTP
+│       ├── components/      # React components
+│       ├── pages/           # views
+│       └── api/             # HTTP client
 ├── tests/
-│   ├── unit/                # pytest unit
-│   ├── integration/         # pytest integration
+│   ├── unit/                # pytest unit tests
+│   ├── integration/         # pytest integration tests
 │   └── e2e/                 # Robot Framework
 │       ├── resources/       # keywords, variables
-│       └── tests/           # pliki .robot
+│       └── tests/           # .robot files
 └── .github/workflows/       # GitHub Actions
 ```
 
-## Architektura
+## Architecture
 
 ```
 [React Frontend] → [FastAPI] → [PostgreSQL]
@@ -94,19 +93,19 @@ price-tracker/
                        ↓
                [Celery Worker]
                        ↓
-            [Selenium Scraper] → ceny → [ML Service]
+            [Selenium Scraper] → prices → [ML Service]
 ```
 
 ## API Endpoints
 
-| Method | Endpoint | Opis |
+| Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/v1/products/` | Lista produktów |
-| POST | `/api/v1/products/` | Dodaj produkt |
-| GET | `/api/v1/products/{id}` | Szczegóły produktu |
-| DELETE | `/api/v1/products/{id}` | Usuń produkt |
-| POST | `/api/v1/products/{id}/alerts` | Ustaw alert cenowy |
-| GET | `/api/v1/products/{id}/forecast` | Predykcja ML |
+| GET | `/api/v1/products/` | List all products |
+| POST | `/api/v1/products/` | Add a new product |
+| GET | `/api/v1/products/{id}` | Get product details |
+| DELETE | `/api/v1/products/{id}` | Delete a product |
+| POST | `/api/v1/products/{id}/alerts` | Set a price alert |
+| GET | `/api/v1/products/{id}/forecast` | Get ML price forecast |
 | GET | `/health` | Health check |
 
-Pełna dokumentacja: http://localhost:8000/docs
+Full API documentation: http://localhost:8000/docs
