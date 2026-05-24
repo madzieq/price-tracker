@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 class MLService:
     @staticmethod
     def predict_price(price_history: list[dict], days_ahead: int = 7) -> dict:
-        """ Predict future price using linear regression on price history.
+        """Predict future price using linear regression on price history.
 
         Requires at least 5 data points to generate a forecast.
 
@@ -49,10 +49,9 @@ class MLService:
             "days_ahead": days_ahead,
         }
 
-
     @staticmethod
     def get_statistics(prices: list[float]) -> dict:
-        """ Calculate basic statistics for a list of prices.
+        """Calculate basic statistics for a list of prices.
 
         Args:
             prices: list of price values in chronological order

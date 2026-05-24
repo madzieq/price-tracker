@@ -29,6 +29,7 @@ app.add_middleware(
 # e.g. GET /api/v1/products/, POST /api/v1/products/, GET /api/v1/products/{id}
 app.include_router(products.router, prefix="/api/v1")
 
+
 # Simple health check endpoint — used by Docker and CI/CD to verify the app is running
 # GET /health → {"status": "ok", "app": "Price Tracker"}
 @app.get("/health")

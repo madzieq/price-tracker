@@ -43,7 +43,9 @@ class PriceScraper:
             options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+        options.add_argument(
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        )
 
         return webdriver.Remote(
             command_executor=settings.SELENIUM_HUB_URL,
@@ -63,7 +65,9 @@ class PriceScraper:
             for selector in selectors:
                 try:
                     element = WebDriverWait(driver, 5).until(
-                        expected_conditions.presence_of_element_located((By.CSS_SELECTOR, selector))
+                        expected_conditions.presence_of_element_located(
+                            (By.CSS_SELECTOR, selector)
+                        )
                     )
                     price_text = element.text or element.get_attribute("content") or ""
                     price = self._parse_price(price_text)

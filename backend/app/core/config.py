@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         return self.ENVIRONMENT == "production"
 
+
 # Single global instance (singleton pattern) — imported across the entire application
 # Usage: from app.core.config import settings
 settings = Settings()
