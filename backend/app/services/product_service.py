@@ -1,5 +1,6 @@
 import re
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+
 from sqlalchemy.orm import Session
 
 from app.models.product import Alert, PriceHistory, Product
@@ -84,7 +85,7 @@ class ProductService:
         """ Check all active alerts for a product and trigger them if price dropped below threshold. """
         alerts = (
             self.db.query(Alert)
-            .filter(Alert.product_id == product_id, Alert.is_active == True)
+            .filter(Alert.product_id == product_id, Alert.is_active)
             .all()
         )
         for alert in alerts:

@@ -1,10 +1,9 @@
 import logging
-from tenacity import retry, stop_after_attempt, wait_exponential
 
-from app.workers.celery_app import celery_app
 from app.db.base import SessionLocal
 from app.models.product import Product
 from app.services.product_service import ProductService
+from app.workers.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ def scrape_product(self, product_id: int):
 def scrape_all_products():
     db = SessionLocal()
     try:
-        products = db.query(Product).filter(Product.is_active == True).all()
+        products = db.query(Product).filter(Product.is_active).all()
         for product in products:
             scrape_product.delay(product.id)
         logger.info(f"Queued {len(products)} products for scraping")

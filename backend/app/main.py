@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
 from app.api.routes import products
+from app.core.config import settings
 
 # Main FastAPI application instance
 # title, description and version are visible in Swagger UI at /docs

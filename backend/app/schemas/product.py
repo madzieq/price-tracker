@@ -1,5 +1,6 @@
 from datetime import datetime
-from pydantic import BaseModel, HttpUrl, EmailStr
+
+from pydantic import BaseModel, EmailStr, HttpUrl
 
 # "Out" suffix — this schema is used for API RESPONSES (sending data to the client)
 # "Create" suffix — this schema is used for API REQUESTS (receiving data from the client)

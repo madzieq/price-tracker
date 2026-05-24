@@ -2,7 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.base import get_db
-from app.schemas.product import AlertCreate, AlertOut, ProductCreate, ProductList, ProductOut
+from app.schemas.product import (
+    AlertCreate,
+    AlertOut,
+    ProductCreate,
+    ProductList,
+    ProductOut,
+)
 from app.services.ml_service import MLService
 from app.services.product_service import ProductService
 
