@@ -1,7 +1,9 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from pydantic import HttpUrl
 from app.services.product_service import ProductService
-from app.schemas.product import ProductCreate, AlertCreate
+from app.schemas.product import ProductCreate
+from app.models.product import Alert
 
 
 @pytest.fixture
@@ -12,6 +14,18 @@ def mock_db():
 @pytest.fixture
 def service(mock_db):
     return ProductService(mock_db)
+
+
+@pytest.fixture
+def sample_alert():
+    return Alert(
+        id=1,
+        product_id=1,
+        threshold_price=1000.0,
+        email="test@example.com",
+        is_active=True,
+        triggered_at=None,
+    )
 
 
 def test_extract_shop_allegro(service):
@@ -28,9 +42,9 @@ def test_extract_shop_unknown(service):
 
 def test_create_product(service, mock_db):
     data = ProductCreate(
-        name="Test Laptop",
-        url="https://allegro.pl/oferta/test-123",
-        scrape_interval_minutes=30,
+        name = "Test Laptop",
+        url = HttpUrl("https://allegro.pl/oferta/test-123"),
+        scrape_interval_minutes = 30,
     )
     mock_db.add = MagicMock()
     mock_db.commit = MagicMock()
@@ -48,35 +62,18 @@ def test_delete_product_not_found(service, mock_db):
     assert result is False
 
 
-def test_check_alerts_triggers_when_price_below_threshold(service, mock_db):
-    from datetime import datetime
-    from app.models.product import Alert
-
-    alert = Alert(
-        id=1,
-        product_id=1,
-        threshold_price=1000.0,
-        email="test@example.com",
-        is_active=True,
-        triggered_at=None,
-    )
-    mock_db.query.return_value.filter.return_value.all.return_value = [alert]
+def test_check_alerts_triggers_when_price_below_threshold(service, mock_db, sample_alert):
+    mock_db.query.return_value.filter.return_value.all.return_value = [sample_alert]
 
     service._check_alerts(product_id=1, current_price=950.0)
 
-    assert alert.triggered_at is not None
+    assert sample_alert.triggered_at is not None
     mock_db.commit.assert_called_once()
 
 
-def test_check_alerts_does_not_trigger_when_price_above(service, mock_db):
-    from app.models.product import Alert
-
-    alert = Alert(
-        id=1, product_id=1, threshold_price=1000.0,
-        email="test@example.com", is_active=True, triggered_at=None,
-    )
-    mock_db.query.return_value.filter.return_value.all.return_value = [alert]
+def test_check_alerts_does_not_trigger_when_price_above(service, mock_db, sample_alert):
+    mock_db.query.return_value.filter.return_value.all.return_value = [sample_alert]
 
     service._check_alerts(product_id=1, current_price=1100.0)
 
-    assert alert.triggered_at is None
+    assert sample_alert.triggered_at is None

@@ -92,7 +92,8 @@ class ProductService:
                 alert.triggered_at = datetime.now(UTC)
                 self.db.commit()
 
-    def _extract_shop(self, url: str) -> str:
+    @staticmethod
+    def _extract_shop(url: str) -> str:
         """Extract shop name from URL.
         Examples:
             "https://www.allegro.pl/offer/123" → "allegro"
