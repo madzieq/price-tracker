@@ -82,7 +82,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://tracker:tracker123@localhost:5432/pricetracker
           REDIS_URL: redis://localhost:6379/0
-        run: pytest tests/integration -v
+        run: pytest ../tests/integration -v
 
   test-e2e:
     name: E2E tests (Robot Framework)
