@@ -88,6 +88,8 @@ jobs:
     name: E2E tests (Robot Framework)
     runs-on: ubuntu-latest
     needs: [test-unit, test-integration]
+    # TODO: enable when React frontend is implemented
+    if: false
     steps:
       - uses: actions/checkout@v4
       - name: Start full stack
