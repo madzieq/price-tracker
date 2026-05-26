@@ -4,28 +4,40 @@ from sklearn.linear_model import LinearRegression
 
 
 class MLService:
-    def predict_price(
-        self, price_history: list[dict], days_ahead: int = 7
-    ) -> dict:
+    @staticmethod
+    def predict_price(price_history: list[dict], days_ahead: int = 7) -> dict:
+        """Predict future price using linear regression on price history.
+
+        Requires at least 5 data points to generate a forecast.
+
+        Args:
+            price_history: list of dicts with 'price' and 'scraped_at' keys
+            days_ahead: how many days into the future to predict (default 7)
+
+        Returns:
+            dict with predicted_price, confidence (0-99%), trend ('up'/'down')
+            or dict with prediction=None if not enough data
+        """
+
         if len(price_history) < 5:
-            return {"prediction": None, "confidence": 0, "message": "Za mało danych"}
+            return {"prediction": None, "confidence": 0, "message": "Not enough data"}
 
         df = pd.DataFrame(price_history)
         df["scraped_at"] = pd.to_datetime(df["scraped_at"])
-        df = df.sort_values("scraped_at")
+        df = df.sort_values("scraped_at")  # linear regression requires sorted data
         df["day_index"] = (df["scraped_at"] - df["scraped_at"].min()).dt.days
 
-        X = df["day_index"].values.reshape(-1, 1)
+        x = df["day_index"].values.reshape(-1, 1)
         y = df["price"].values
 
         model = LinearRegression()
-        model.fit(X, y)
+        model.fit(x, y)
 
         last_day = df["day_index"].max()
         future_day = np.array([[last_day + days_ahead]])
         predicted_price = float(model.predict(future_day)[0])
 
-        score = model.score(X, y)
+        score = model.score(x, y)
         confidence = round(max(0, min(score * 100, 99)), 1)
 
         trend = "down" if model.coef_[0] < 0 else "up"
@@ -37,10 +49,32 @@ class MLService:
             "days_ahead": days_ahead,
         }
 
-    def get_statistics(self, prices: list[float]) -> dict:
+    @staticmethod
+    def get_statistics(prices: list[float]) -> dict:
+        """Calculate basic statistics for a list of prices.
+
+        Args:
+            prices: list of price values in chronological order
+
+        Returns:
+            dict with the following keys:
+                min     — lowest price ever recorded
+                max     — highest price ever recorded
+                mean    — average price
+                std     — standard deviation (how much prices vary)
+                current — most recent price (last element)
+            or empty dict if prices list is empty
+
+        Example:
+            get_statistics([1000.0, 950.0, 920.0])
+            # {"min": 920.0, "max": 1000.0, "mean": 956.67, "std": 33.26, "current": 920.0}
+        """
+
         if not prices:
             return {}
+
         arr = np.array(prices)
+
         return {
             "min": round(float(arr.min()), 2),
             "max": round(float(arr.max()), 2),

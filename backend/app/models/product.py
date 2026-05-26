@@ -1,5 +1,6 @@
-from datetime import datetime, UTC
-from sqlalchemy import String, Float, Boolean, DateTime, ForeignKey, Integer, Text
+from datetime import UTC, datetime
+
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -17,7 +18,9 @@ class Product(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     scrape_interval_minutes: Mapped[int] = mapped_column(Integer, default=30)
     # default=datetime.utcnow — note: no parentheses, SQLAlchemy calls it at insert time
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(UTC)
+    )
 
     # One-to-many: one Product has many PriceHistory records
     # cascade="all, delete-orphan" — deleting a product deletes all its price history
@@ -39,7 +42,7 @@ class Product(Base):
 
 
 class PriceHistory(Base):
-    """ Stores price history for a tracked product.
+    """Stores price history for a tracked product.
     A new record is created every time the scraper successfully fetches a price.
     Args:
         product_id: id of the product this price belongs to
@@ -53,6 +56,7 @@ class PriceHistory(Base):
             currency="PLN"
         )
     """
+
     __tablename__ = "price_history"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -61,7 +65,9 @@ class PriceHistory(Base):
     # String(3) — exactly 3 characters, enough for currency codes (PLN, EUR, USD)
     currency: Mapped[str] = mapped_column(String(3), default="PLN")
     # Indexed because we frequently sort and filter by date
-    scraped_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC), index=True)
+    scraped_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(UTC), index=True
+    )
     scrape_success: Mapped[bool] = mapped_column(Boolean, default=True)
 
     # Many-to-one: many PriceHistory records belong to one Product
@@ -80,7 +86,9 @@ class Alert(Base):
     # datetime | None — Python 3.10+ union type syntax (same as Optional[datetime])
     triggered_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(UTC)
+    )
 
     # Many-to-one: many Alerts belong to one Product
     product: Mapped["Product"] = relationship(back_populates="alerts")

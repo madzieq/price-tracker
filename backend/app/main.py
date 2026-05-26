@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
 from app.api.routes import products
+from app.core.config import settings
 
 # Main FastAPI application instance
 # title, description and version are visible in Swagger UI at /docs
@@ -28,6 +28,7 @@ app.add_middleware(
 # Register the products router — all product endpoints will be available under /api/v1
 # e.g. GET /api/v1/products/, POST /api/v1/products/, GET /api/v1/products/{id}
 app.include_router(products.router, prefix="/api/v1")
+
 
 # Simple health check endpoint — used by Docker and CI/CD to verify the app is running
 # GET /health → {"status": "ok", "app": "Price Tracker"}

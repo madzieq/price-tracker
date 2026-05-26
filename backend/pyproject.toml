@@ -48,7 +48,9 @@ asyncio_mode = "auto"
 addopts = "--cov=app --cov-report=term-missing --cov-report=xml"
 
 [tool.ruff]
-line-length = 88
+line-length = 120
+
+[tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]
 
 [tool.black]

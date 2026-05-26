@@ -13,13 +13,15 @@ engine = create_engine(settings.DATABASE_URL)
 # bind=engine      — connect this session factory to our PostgreSQL engine
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 # Base class for all database models (Product, PriceHistory, Alert)
 # Every model that inherits from Base will be registered as a database table
 class Base(DeclarativeBase):
     pass
 
+
 def get_db():
-    """ Provide a database session for each HTTP request.
+    """Provide a database session for each HTTP request.
 
     Used as a FastAPI dependency via Depends(get_db) in route handlers.
     Ensures the session is always closed after the request, even if an error occurs.

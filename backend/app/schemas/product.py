@@ -1,8 +1,10 @@
 from datetime import datetime
-from pydantic import BaseModel, HttpUrl, EmailStr
+
+from pydantic import BaseModel, EmailStr, HttpUrl
 
 # "Out" suffix — this schema is used for API RESPONSES (sending data to the client)
 # "Create" suffix — this schema is used for API REQUESTS (receiving data from the client)
+
 
 # Represents a single price history entry returned by the API (GET response)
 class PriceHistoryOut(BaseModel):
@@ -57,13 +59,14 @@ class ProductOut(BaseModel):
 
 
 class ProductList(BaseModel):
-    """ Paginated response wrapper for product list endpoints.
+    """Paginated response wrapper for product list endpoints.
 
-        Example response:
-            {
-                "items": [...],
-                "total": 100
-            }
+    Example response:
+        {
+            "items": [...],
+            "total": 100
+        }
     """
+
     items: list[ProductOut]
     total: int  # total number of products in the database (not just on this page)
